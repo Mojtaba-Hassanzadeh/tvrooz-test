@@ -1,15 +1,16 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IsString, Length } from 'class-validator';
-import { Document } from 'mongoose';
-import { CoreEntity } from 'src/common/entities/core.entity';
+import { IsString } from 'class-validator';
+import mongoose, { Document } from 'mongoose';
+import { Category } from 'src/categories/entities/category.entity';
+import { Link } from 'src/links/entities/link.entity';
 
 export type MovieDocument = Movie & Document;
 
 @InputType('MovieInputType', { isAbstract: true })
 @ObjectType()
 @Schema({ timestamps: true })
-export class Movie extends CoreEntity {
+export class Movie {
   @Field(() => String)
   @Prop()
   @IsString()
@@ -20,20 +21,22 @@ export class Movie extends CoreEntity {
   @IsString()
   secondaryTitle: string;
 
-  //   @Field(() => [Category], { nullable: true })
-  //   @Prop([{
-  //     type: String,
-  //     ref: 'Category',
-  //     required: false,
-  //   }])
-  //   categories: Category[];
+  @Field(() => [Category], { nullable: true })
+  @Prop([
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required: false,
+    },
+  ])
+  categories: mongoose.Types.ObjectId[];
 
-  //   @Field(() => Link)
-  //   @Prop({
-  //     type: String,
-  //     ref: 'Link',
-  //   })
-  //   link: Link;
+  @Field(() => Link)
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Link',
+  })
+  link: Link;
 }
 
 export const MoviewSchema = SchemaFactory.createForClass(Movie);

@@ -2,10 +2,21 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Category {
+  name: String!
+  slug: String!
+}
+
+type Link {
+  url: String!
+  movie: Movie!
+}
+
 type Movie {
-  _id: String!
   name: String!
   secondaryTitle: String!
+  categories: [Category!]
+  link: Link!
 }
 
 type MoviesOutput {
@@ -16,10 +27,39 @@ type MoviesOutput {
   results: [Movie!]
 }
 
+type AllCategoriesOutput {
+  error: String
+  ok: Boolean!
+  categories: [Category!]
+}
+
+type CategoryOutput {
+  error: String
+  ok: Boolean!
+  category: Category
+}
+
+type CreateCategoryOutput {
+  error: String
+  ok: Boolean!
+  category: Category
+}
+
 type Query {
   movies(input: MoviesInput!): MoviesOutput!
+  allCategories: AllCategoriesOutput!
+  findCategoryById(id: String!): CategoryOutput!
+  findCategoryByName(name: String!): CategoryOutput!
 }
 
 input MoviesInput {
   page: Int = 1
+}
+
+type Mutation {
+  createAccount(input: CreateCategoryInput!): CreateCategoryOutput!
+}
+
+input CreateCategoryInput {
+  name: String!
 }

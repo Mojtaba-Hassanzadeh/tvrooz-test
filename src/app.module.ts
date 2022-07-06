@@ -4,6 +4,8 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { MongooseModule } from '@nestjs/mongoose';
 import { join } from 'path';
 import { MoviesModule } from './movies/movies.module';
+import { CategoriesModule } from './categories/categories.module';
+import { LinksModule } from './links/links.module';
 
 @Module({
   imports: [
@@ -13,6 +15,8 @@ import { MoviesModule } from './movies/movies.module';
     }),
     MongooseModule.forRoot('mongodb://localhost:27017/tvrooz-test'),
     MoviesModule,
+    CategoriesModule,
+    LinksModule,
   ],
   controllers: [],
   providers: [],
