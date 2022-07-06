@@ -1,0 +1,25 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Movie {
+  _id: String!
+  name: String!
+  secondaryTitle: String!
+}
+
+type MoviesOutput {
+  error: String
+  ok: Boolean!
+  totalPages: Int
+  totalResults: Int
+  results: [Movie!]
+}
+
+type Query {
+  movies(input: MoviesInput!): MoviesOutput!
+}
+
+input MoviesInput {
+  page: Int = 1
+}
