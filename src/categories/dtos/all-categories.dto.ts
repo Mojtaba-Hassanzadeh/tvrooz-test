@@ -1,9 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { CoreOutput } from 'src/common/dtos/otuput.dto';
+import { PaginationOutput } from 'src/common/dtos/pagination.dto';
 import { Category } from '../entities/category.entity';
 
 @ObjectType()
-export class AllCategoriesOutput extends CoreOutput {
+export class CategoriesOutput extends PaginationOutput {
   @Field(() => [Category], { nullable: true })
   categories?: Category[];
 }

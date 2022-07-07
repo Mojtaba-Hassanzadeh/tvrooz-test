@@ -29,12 +29,13 @@ export class CategoryRepository {
     return category;
   }
 
-  async getSlug(name: string): Promise<string> {
+  getSlug(name: string): string {
     const categoryName = name.trim().toLowerCase();
     return categoryName.replace(/ /g, '-');
   }
 
-  async checkExists(categorySlug: string): Promise<boolean> {
+  async checkExists(categoryName: string): Promise<boolean> {
+    const categorySlug = this.getSlug(categoryName);
     let category = null;
     category = await this.categoriesModel
       .findOne({ slug: categorySlug })
@@ -43,8 +44,7 @@ export class CategoryRepository {
   }
 
   async createCategory(input: CreateCategoryInput): Promise<Category> {
-    const categoryName = input.name.trim().toLowerCase();
-    const categorySlug = categoryName.replace(/ /g, '-');
+    const categorySlug = this.getSlug(input.name);
     const category = new this.categoriesModel({
       name: input.name,
       slug: categorySlug,

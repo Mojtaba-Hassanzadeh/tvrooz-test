@@ -1,19 +1,21 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CategoryService } from './categories.service';
-import { AllCategoriesOutput } from './dtos/all-categories.dto';
-import { CategoryOutput } from './dtos/category.dto';
+import { CategoriesOutput } from './dtos/all-categories.dto';
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
   CreateCategoryInput,
   CreateCategoryOutput,
 } from './dtos/create-category.dto';
+import { DeleteCategoryOutput } from './dtos/delete-category.dto';
+import { EditCategoryInput } from './dtos/edit-category.dto';
 import { Category } from './entities/category.entity';
 
 @Resolver(() => Category)
 export class CategoryResolver {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @Query(() => AllCategoriesOutput)
-  allCategories(): Promise<AllCategoriesOutput> {
+  @Query(() => CategoriesOutput)
+  allCategories(): Promise<CategoriesOutput> {
     return this.categoryService.allCategories();
   }
 
@@ -36,8 +38,22 @@ export class CategoryResolver {
     }
   }
 
-  @Query(() => CategoryOutput)
-  findCategoryByName(@Args('name') name: string): Promise<CategoryOutput> {
-    return this.categoryService.findCategoryByName(name);
+  @Query(() => CategoriesOutput)
+  findCategoryByName(
+    @Args('input') input: CategoryInput,
+  ): Promise<CategoriesOutput> {
+    return this.categoryService.findCategoryByName(input);
+  }
+
+  @Mutation(() => CategoryOutput)
+  updateCategoryById(
+    @Args('input') input: EditCategoryInput,
+  ): Promise<CategoryOutput> {
+    return this.categoryService.updateCategoryById(input);
+  }
+
+  @Mutation(() => DeleteCategoryOutput)
+  deleteCategoryById(@Args('id') id: string): Promise<DeleteCategoryOutput> {
+    return this.categoryService.deleteCategoryById(id);
   }
 }

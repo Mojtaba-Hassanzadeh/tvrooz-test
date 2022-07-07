@@ -3,6 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsString } from 'class-validator';
 import mongoose, { Document } from 'mongoose';
 import { Category } from 'src/categories/entities/category.entity';
+import { CoreEntity } from 'src/common/entities/core.entity';
 import { Link } from 'src/links/entities/link.entity';
 
 export type MovieDocument = Movie & Document;
@@ -10,7 +11,7 @@ export type MovieDocument = Movie & Document;
 @InputType('MovieInputType', { isAbstract: true })
 @ObjectType()
 @Schema({ timestamps: true })
-export class Movie {
+export class Movie extends CoreEntity {
   @Field(() => String)
   @Prop()
   @IsString()
@@ -36,7 +37,7 @@ export class Movie {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Link',
   })
-  link: Link;
+  link: mongoose.Types.ObjectId;
 }
 
 export const MoviewSchema = SchemaFactory.createForClass(Movie);

@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { AllCategoriesOutput } from './dtos/all-categories.dto';
-import { CategoryOutput } from './dtos/category.dto';
+import { CategoriesOutput } from './dtos/all-categories.dto';
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
   CreateCategoryInput,
   CreateCategoryOutput,
 } from './dtos/create-category.dto';
+import { DeleteCategoryOutput } from './dtos/delete-category.dto';
+import {
+  EditCategoryInput,
+  EditCategoryOutput,
+} from './dtos/edit-category.dto';
 import { Category, CategoryDocument } from './entities/category.entity';
 import { CategoryRepository } from './repositories/category.repository';
 
@@ -18,7 +23,7 @@ export class CategoryService {
     private readonly categoryRepository: CategoryRepository,
   ) {}
 
-  async allCategories(): Promise<AllCategoriesOutput> {
+  async allCategories(): Promise<CategoriesOutput> {
     try {
       const categories = await this.categoriesModel.find();
       return {
@@ -54,24 +59,20 @@ export class CategoryService {
     }
   }
 
-  async findCategoryByName(name: string): Promise<CategoryOutput> {
+  async findCategoryByName(input: CategoryInput): Promise<CategoriesOutput> {
     try {
-      const [category] = await this.categoriesModel.find(
-        {
-          name: {
-            $regex: name,
-            $options: 'i',
-          },
+      const categories = await this.categoriesModel.find({
+        name: {
+          $regex: input.name,
+          $options: 'i',
         },
-        // {
-        //   limit: 25,
-        //   skip: (page - 1) * 25,
-        // },
-      );
-      if (category) {
+        limit: 25,
+        skip: (input.page - 1) * 25,
+      });
+      if (categories) {
         return {
           ok: true,
-          category,
+          categories,
         };
       }
       return {
@@ -90,8 +91,7 @@ export class CategoryService {
     input: CreateCategoryInput,
   ): Promise<CreateCategoryOutput> {
     try {
-      const slug = await this.categoryRepository.getSlug(input.name);
-      const isExists = await this.categoryRepository.checkExists(slug);
+      const isExists = await this.categoryRepository.checkExists(input.name);
       if (isExists) {
         return { ok: false, error: 'This category already exists' };
       }
@@ -99,6 +99,51 @@ export class CategoryService {
       return { ok: true, category };
     } catch (e) {
       return { ok: false, error: "Can't create category" };
+    }
+  }
+
+  async updateCategoryById({
+    id,
+    name,
+  }: EditCategoryInput): Promise<CategoryOutput> {
+    try {
+      const category = await this.categoriesModel.findByIdAndUpdate(
+        id,
+        {
+          name,
+          slug: this.categoryRepository.getSlug(name),
+        },
+        { new: true },
+      );
+      return {
+        ok: true,
+        category,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not edit category',
+      };
+    }
+  }
+
+  async deleteCategoryById(id: string): Promise<DeleteCategoryOutput> {
+    try {
+      const category = await this.categoriesModel.findByIdAndDelete(id);
+      if (category) {
+        return {
+          ok: true,
+        };
+      }
+      return {
+        ok: false,
+        error: 'Category not found',
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not delete category',
+      };
     }
   }
 }
