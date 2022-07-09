@@ -67,11 +67,36 @@ type DeleteCategoryOutput {
   ok: Boolean!
 }
 
+type CreateLinkOutput {
+  error: String
+  ok: Boolean!
+  link: Link
+}
+
+type DeleteLinkOutput {
+  error: String
+  ok: Boolean!
+}
+
+type LinkOutput {
+  error: String
+  ok: Boolean!
+  link: Link
+}
+
+type LinksOutput {
+  error: String
+  ok: Boolean!
+  links: [Link!]
+}
+
 type Query {
   movies(input: MoviesInput!): MoviesOutput!
   allCategories: CategoriesOutput!
   findCategoryById(id: String!): CategoryOutput!
   findCategoryByName(input: CategoryInput!): CategoriesOutput!
+  allLinks: LinksOutput!
+  getLinkById(id: String!): LinkOutput!
 }
 
 input MoviesInput {
@@ -87,6 +112,9 @@ type Mutation {
   createAccount(input: CreateCategoryInput!): CreateCategoryOutput!
   updateCategoryById(input: EditCategoryInput!): CategoryOutput!
   deleteCategoryById(id: String!): DeleteCategoryOutput!
+  createLink(input: CreateLinkInput!): CreateLinkOutput!
+  updateLink(input: UpdateLinkInput!): LinkOutput!
+  deleteLink(id: String!): DeleteLinkOutput!
 }
 
 input CreateCategoryInput {
@@ -96,4 +124,13 @@ input CreateCategoryInput {
 input EditCategoryInput {
   name: String
   id: String!
+}
+
+input CreateLinkInput {
+  url: String!
+}
+
+input UpdateLinkInput {
+  _id: String!
+  url: String!
 }
