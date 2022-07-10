@@ -24,4 +24,10 @@ export class LinkRepository {
     await link.save();
     return link;
   }
+
+  async createLinkWithMovie(link: string, movie: string): Promise<Link> {
+    let updatedLink: Link = null
+    updatedLink = await this.linksModel.findByIdAndUpdate(link, {movie: movie}, {  new: true });
+    return updatedLink;
+  }
 }
