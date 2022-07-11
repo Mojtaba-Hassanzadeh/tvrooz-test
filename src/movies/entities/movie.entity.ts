@@ -36,6 +36,7 @@ export class Movie extends CoreEntity {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Link',
+    required: false,
   })
   link: mongoose.Types.ObjectId;
 }

@@ -2,27 +2,18 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Category {
+type Link {
   _id: String!
   createdAt: DateTime!
   updatedAt: DateTime!
-  name: String!
-  slug: String!
-  movies: [Movie!]
+  url: String!
+  movie: Movie
 }
 
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
-
-type Link {
-  _id: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  url: String!
-  movie: Movie!
-}
 
 type Movie {
   _id: String!
@@ -32,6 +23,21 @@ type Movie {
   secondaryTitle: String!
   categories: [Category!]
   link: Link!
+}
+
+type Category {
+  _id: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  slug: String!
+  movies: [Movie!]
+}
+
+type CreateMovieOutput {
+  error: String
+  ok: Boolean!
+  movie: Movie
 }
 
 type MoviesOutput {
@@ -109,12 +115,20 @@ input CategoryInput {
 }
 
 type Mutation {
+  createMovie(input: CreateMovieInput!): CreateMovieOutput!
   createAccount(input: CreateCategoryInput!): CreateCategoryOutput!
   updateCategoryById(input: EditCategoryInput!): CategoryOutput!
   deleteCategoryById(id: String!): DeleteCategoryOutput!
   createLink(input: CreateLinkInput!): CreateLinkOutput!
   updateLink(input: UpdateLinkInput!): LinkOutput!
   deleteLink(id: String!): DeleteLinkOutput!
+}
+
+input CreateMovieInput {
+  name: String!
+  secondaryTitle: String!
+  link: String
+  categories: [String!]
 }
 
 input CreateCategoryInput {

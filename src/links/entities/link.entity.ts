@@ -7,7 +7,7 @@ import { Movie } from 'src/movies/entities/movie.entity';
 
 export type LinkDocument = Link & Document;
 
-@InputType('CategoryInputType', { isAbstract: true })
+@InputType('LinkInputType', { isAbstract: true })
 @ObjectType()
 @Schema({ timestamps: true })
 export class Link extends CoreEntity {
@@ -16,7 +16,7 @@ export class Link extends CoreEntity {
   @IsString()
   url: string;
 
-  @Field(() => Movie)
+  @Field(() => Movie, { nullable: true })
   @Prop({
     type: {
       type: mongoose.Schema.Types.ObjectId,

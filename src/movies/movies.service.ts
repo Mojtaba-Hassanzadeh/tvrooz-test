@@ -4,12 +4,14 @@ import { Model } from 'mongoose';
 import { CreateMovieInput, CreateMovieOutput } from './dtos/create-movie.dto';
 import { MoviesInput, MoviesOutput } from './dtos/movies.dto';
 import { Movie, MovieDocument } from './entities/movie.entity';
+import { MovieRepository } from './repositories/movie.repository';
 
 @Injectable()
 export class MovieService {
   constructor(
     @InjectModel(Movie.name)
     private readonly moviesModel: Model<MovieDocument>,
+    private readonly moviesRepo: MovieRepository,
   ) {}
 
   async allMovies({ page }: MoviesInput): Promise<MoviesOutput> {
@@ -35,21 +37,10 @@ export class MovieService {
 
   async createMovie(input: CreateMovieInput): Promise<CreateMovieOutput> {
     try {
-      // const isExists = await this.linkRepository.checkExists(input.url);
-      // if (isExists) {
-      //   return { ok: false, error: 'This link already exists' };
-      // }
-      const movie = new this.moviesModel({
-        name: input.name,
-        secondaryTitle: input.secondaryTitle,
-        categories: input.categories, 
-        link: input.link,
-      });
-      await movie.save();
+      const movie = await this.moviesRepo.createMovie(input);
       return { ok: true, movie };
     } catch (e) {
       return { ok: false, error: "Can't create movie" };
     }
   }
-
 }

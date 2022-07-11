@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateLinkInput } from '../dtos/create-link.dto';
-import { Link } from '../entities/link.entity';
+import { Link, LinkDocument } from '../entities/link.entity';
 
 @Injectable()
 export class LinkRepository {
   constructor(
     @InjectModel(Link.name)
-    private readonly linksModel: Model<Link>,
+    private readonly linksModel: Model<LinkDocument>,
   ) {}
 
   async checkExists(url: string): Promise<boolean> {
@@ -26,8 +26,12 @@ export class LinkRepository {
   }
 
   async createLinkWithMovie(link: string, movie: string): Promise<Link> {
-    let updatedLink: Link = null
-    updatedLink = await this.linksModel.findByIdAndUpdate(link, {movie: movie}, {  new: true });
+    let updatedLink: Link = null;
+    updatedLink = await this.linksModel.findByIdAndUpdate(
+      link,
+      { movie: movie },
+      { new: true },
+    );
     return updatedLink;
   }
 }
