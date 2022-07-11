@@ -32,7 +32,7 @@ export class Movie extends CoreEntity {
   ])
   categories: mongoose.Types.ObjectId[];
 
-  @Field(() => Link)
+  // @Field(() => Link, { nullable: true })
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Link',

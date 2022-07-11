@@ -9,6 +9,7 @@ import { LinkRepository } from './repositories/link.repository';
   imports: [
     MongooseModule.forFeature([{ name: Link.name, schema: LinkSchema }]),
   ],
+  exports: [LinkService, LinkRepository, MongooseModule],
   providers: [LinkService, LinkResolver, LinkRepository],
 })
 export class LinksModule {}

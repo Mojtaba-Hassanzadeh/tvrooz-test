@@ -11,6 +11,7 @@ import { CategoryRepository } from './repositories/category.repository';
       { name: Category.name, schema: CategorySchema },
     ]),
   ],
-  providers: [CategoryResolver, CategoryService, CategoryRepository],
+  exports: [CategoryService, CategoryRepository, MongooseModule],
+  providers: [CategoryService, CategoryResolver, CategoryRepository],
 })
 export class CategoriesModule {}

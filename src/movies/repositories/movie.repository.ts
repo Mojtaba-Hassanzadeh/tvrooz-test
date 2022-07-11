@@ -7,6 +7,7 @@ import {
 } from 'src/categories/entities/category.entity';
 import { Link, LinkDocument } from 'src/links/entities/link.entity';
 import { CreateMovieInput } from '../dtos/create-movie.dto';
+import { UpdateMovieInput } from '../dtos/update-movie.dto';
 import { Movie, MovieDocument } from '../entities/movie.entity';
 
 @Injectable()
@@ -46,6 +47,68 @@ export class MovieRepository {
           );
           if (category) {
             await newMovie.updateOne(
+              { $push: { categories: category._id } },
+              { new: true },
+            );
+          }
+        });
+      }
+      return movie;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async updateMovie(input: UpdateMovieInput): Promise<Movie> {
+    try {
+      // const movie = await this.moviesRepo.findByIdAndUpdate(
+      //   input._id,
+      //   {
+      //     name: input.name,
+      //     secondaryTitle: input.secondaryTitle,
+      //   },
+      //   {
+      //     new: true,
+      //   },
+      // );
+      const movie = null;
+      if (movie) {
+        if (input.name) {
+          movie.name = input.name;
+        }
+      }
+      if (input.link && movie.link.toString() !== input.link) {
+        await this.linksModel.findByIdAndUpdate(
+          movie.link,
+          { movie: null },
+          { new: true },
+        );
+        const newLink = await this.linksModel.findByIdAndUpdate(
+          input.link,
+          { movie: movie._id },
+          { new: true },
+        );
+        if (newLink) {
+          movie.link = newLink._id;
+          await movie.save();
+        }
+      }
+      if (input.categories.length > 0) {
+        movie.categories.forEach(async (oldCategoryId) => {
+          await this.categoriesModel.findByIdAndUpdate(
+            oldCategoryId,
+            { $pop: { movies: movie._id } },
+            { new: true },
+          );
+        });
+        input.categories.forEach(async (newCategoryId) => {
+          const category = await this.categoriesModel.findByIdAndUpdate(
+            newCategoryId,
+            { $push: { movies: movie._id } },
+            { new: true },
+          );
+          if (category) {
+            await movie.updateOne(
               { $push: { categories: category._id } },
               { new: true },
             );

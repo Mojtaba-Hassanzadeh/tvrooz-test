@@ -1,7 +1,4 @@
-import { Args, Mutation, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { Prop } from '@nestjs/mongoose';
-import mongoose, { ObjectId } from 'mongoose';
-import { Movie } from 'src/movies/entities/movie.entity';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateLinkInput, CreateLinkOutput } from './dtos/create-link.dto';
 import { DeleteLinkOutput } from './dtos/delete-link.dto';
 import { UpdateLinkInput } from './dtos/edit-link.dto';

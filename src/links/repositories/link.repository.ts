@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel, MongooseModule } from '@nestjs/mongoose';
-import mongoose, { Model, ObjectId } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateLinkInput } from '../dtos/create-link.dto';
 import { Link, LinkDocument } from '../entities/link.entity';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class LinkRepository {
@@ -35,9 +36,11 @@ export class LinkRepository {
     return updatedLink;
   }
 
-  async getLinkByMovieId(id: string): Promise<Link> {
-    let link = null;
-    link = await this.linksModel.findOne({ movie: id }).exec();
-    return link;
+  async getLinkByMovieId(id: ObjectId): Promise<Link> {
+    try {
+      return await this.linksModel.findOne({ movie: id }).exec();
+    } catch (error) {
+      return null;
+    }
   }
 }

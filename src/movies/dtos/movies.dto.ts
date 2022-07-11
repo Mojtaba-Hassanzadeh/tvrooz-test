@@ -11,5 +11,5 @@ export class MoviesInput extends PaginationInput {}
 @ObjectType()
 export class MoviesOutput extends PaginationOutput {
   @Field(() => [Movie], { nullable: true })
-  results?: Movie[];
+  movies?: Movie[];
 }

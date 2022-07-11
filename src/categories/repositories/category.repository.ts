@@ -3,6 +3,7 @@ import { Category, CategoryDocument } from '../entities/category.entity';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateCategoryInput } from '../dtos/create-category.dto';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class CategoryRepository {
@@ -51,5 +52,13 @@ export class CategoryRepository {
     });
     await category.save();
     return category;
+  }
+
+  async getCategoriesByMovieId(id: ObjectId): Promise<Category> {
+    try {
+      return await this.categoriesModel.findOne({ movie: id }).exec();
+    } catch (error) {
+      return null;
+    }
   }
 }
