@@ -56,7 +56,11 @@ export class CategoryRepository {
 
   async getCategoriesByMovieId(id: ObjectId): Promise<Category> {
     try {
-      return await this.categoriesModel.findOne({ movie: id }).exec();
+      console.log(id);
+      console.log(await this.categoriesModel.find({ 
+        movie: {"$in": [id]} 
+      }).exec());
+      return await this.categoriesModel.findOne({ movie: id });
     } catch (error) {
       return null;
     }
