@@ -7,6 +7,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { Link } from 'src/links/entities/link.entity';
+import { LinkRepository } from 'src/links/repositories/link.repository';
 import { LinkService } from 'src/links/links.service';
 import { CreateMovieInput, CreateMovieOutput } from './dtos/create-movie.dto';
 import { MoviesInput, MoviesOutput } from './dtos/movies.dto';
@@ -17,7 +18,7 @@ import { MovieService } from './movies.service';
 export class MovieResolver {
   constructor(
     private readonly movieService: MovieService,
-    private readonly linkService: LinkService,
+    private readonly linkRepo: LinkRepository,
   ) {}
 
   @Query(() => MoviesOutput)
@@ -32,10 +33,9 @@ export class MovieResolver {
     return this.movieService.createMovie(input);
   }
 
-  @ResolveField()
-  async posts(@Parent() movie: Movie) {
-    const { _id } = movie;
-    return this.linkService.findOne({ movie: _id });
+  @ResolveField(() => Link)
+  async link(@Parent() movie: Movie) {
+    return this.linkRepo.getLinkByMovieId(movie._id.toString());
   }
 
   // @ResolveField(() => Link)

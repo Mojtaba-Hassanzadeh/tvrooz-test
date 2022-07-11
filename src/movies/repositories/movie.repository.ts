@@ -45,8 +45,10 @@ export class MovieRepository {
             { new: true },
           );
           if (category) {
-            newMovie.categories = category._id;
-            await newMovie.save();
+            await newMovie.updateOne(
+              { $push: { categories: category._id } },
+              { new: true },
+            );
           }
         });
       }
