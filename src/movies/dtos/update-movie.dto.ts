@@ -4,7 +4,10 @@ import { Movie } from '../entities/movie.entity';
 import { CreateMovieInput } from './create-movie.dto';
 
 @InputType()
-export class UpdateMovieInput extends PartialType(CreateMovieInput) {}
+export class UpdateMovieInput extends PartialType(CreateMovieInput) {
+  @Field(() => String)
+  id: string;
+}
 
 @ObjectType()
 export class UpdateMovieOutput extends CoreOutput {

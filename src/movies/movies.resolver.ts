@@ -17,6 +17,7 @@ import { UpdateLinkOutput } from 'src/links/dtos/edit-link.dto';
 import { UpdateMovieInput } from './dtos/update-movie.dto';
 import { Category } from 'src/categories/entities/category.entity';
 import { CategoryRepository } from 'src/categories/repositories/category.repository';
+import { DeleteMovieOutput } from './dtos/delete-movie.dto';
 
 @Resolver(() => Movie)
 export class MovieResolver {
@@ -36,9 +37,10 @@ export class MovieResolver {
     return await this.linkRepo.getLinkByMovieId(movie._id);
   }
 
+  //TODO: null
   @ResolveField(() => Category, { nullable: true })
   async category(@Parent() movie: Movie): Promise<Category> {
-    return await this.categoryRepo.getCategoriesByMovieId(movie._id);
+    return await this.categoryRepo.getCategoriesByMovieId(movie);
   }
 
   @Mutation(() => CreateMovieOutput)
@@ -53,6 +55,11 @@ export class MovieResolver {
     @Args('input') input: UpdateMovieInput,
   ): Promise<UpdateLinkOutput> {
     return this.movieService.updateMovie(input);
+  }
+
+  @Mutation(() => DeleteMovieOutput)
+  deleteMovie(@Args('id') id: string): Promise<DeleteMovieOutput> {
+    return this.movieService.deleteMovie(id);
   }
 
   // @ResolveField(() => Link)

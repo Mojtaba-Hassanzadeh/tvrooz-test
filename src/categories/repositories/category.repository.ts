@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateCategoryInput } from '../dtos/create-category.dto';
 import { ObjectId } from 'mongodb';
+import { Movie } from 'src/movies/entities/movie.entity';
 
 @Injectable()
 export class CategoryRepository {
@@ -54,13 +55,31 @@ export class CategoryRepository {
     return category;
   }
 
-  async getCategoriesByMovieId(id: ObjectId): Promise<Category> {
+  // async getCategoriesByMovieId(id: ObjectId): Promise<Category> {
+  //   try {
+  //     console.log(id);
+  //     console.log(await this.categoriesModel.find({ movie: [id] }).exec());
+  //     return await this.categoriesModel.findOne({ movie: id });
+  //   } catch (error) {
+  //     return null;
+  //   }
+  // }
+
+  async getCategoriesByMovieId(movie: Movie): Promise<Category> {
     try {
-      console.log(id);
-      console.log(await this.categoriesModel.find({ 
-        movie: {"$in": [id]} 
-      }).exec());
-      return await this.categoriesModel.findOne({ movie: id });
+      if (movie.categories.length > 0) {
+        movie.categories.forEach(async (category) => {
+          const cat = await this.categoriesModel.findById(category);
+          if (cat) {
+            console.log(cat);
+            return cat;
+          } else {
+            return null;
+          }
+        });
+      } else {
+        return null;
+      }
     } catch (error) {
       return null;
     }

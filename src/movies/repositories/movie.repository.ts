@@ -59,19 +59,19 @@ export class MovieRepository {
     }
   }
 
+  // TODO: check again
   async updateMovie(input: UpdateMovieInput): Promise<Movie> {
     try {
-      // const movie = await this.moviesRepo.findByIdAndUpdate(
-      //   input._id,
-      //   {
-      //     name: input.name,
-      //     secondaryTitle: input.secondaryTitle,
-      //   },
-      //   {
-      //     new: true,
-      //   },
-      // );
-      const movie = null;
+      const movie = await this.moviesRepo.findByIdAndUpdate(
+        input.id,
+        {
+          name: input.name,
+          secondaryTitle: input.secondaryTitle,
+        },
+        {
+          new: true,
+        },
+      );
       if (movie) {
         if (input.name) {
           movie.name = input.name;
@@ -97,7 +97,7 @@ export class MovieRepository {
         movie.categories.forEach(async (oldCategoryId) => {
           await this.categoriesModel.findByIdAndUpdate(
             oldCategoryId,
-            { $pop: { movies: movie._id } },
+            { $pull: { movies: movie._id } },
             { new: true },
           );
         });
@@ -115,6 +115,32 @@ export class MovieRepository {
           }
         });
       }
+      return movie;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async deleteMovie(id: string): Promise<Movie> {
+    try {
+      const movie = await this.moviesRepo.findById(id);
+      if (movie.link) {
+        await this.linksModel.findByIdAndUpdate(
+          movie.link,
+          { movie: null },
+          { new: true },
+        );
+      }
+      if (movie.categories.length > 0) {
+        movie.categories.forEach(async (categoryId) => {
+          await this.categoriesModel.findByIdAndUpdate(
+            categoryId,
+            { $pull: { movies: movie._id } },
+            { new: true },
+          );
+        });
+      }
+      await this.moviesRepo.deleteOne(movie._id);
       return movie;
     } catch (error) {
       return null;

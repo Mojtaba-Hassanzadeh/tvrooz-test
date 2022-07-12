@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateMovieInput, CreateMovieOutput } from './dtos/create-movie.dto';
+import { DeleteMovieOutput } from './dtos/delete-movie.dto';
 import { MoviesInput, MoviesOutput } from './dtos/movies.dto';
 import { UpdateMovieInput, UpdateMovieOutput } from './dtos/update-movie.dto';
 import { Movie, MovieDocument } from './entities/movie.entity';
@@ -53,6 +54,21 @@ export class MovieService {
       return {
         ok: false,
         error: 'Could not update movie',
+      };
+    }
+  }
+
+  async deleteMovie(id: string): Promise<DeleteMovieOutput> {
+    try {
+      const movie = await this.moviesRepo.deleteMovie(id);
+      if (movie) {
+        return { ok: true };
+      }
+      return { ok: false, error: 'Movie not found' };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not delete movie',
       };
     }
   }
