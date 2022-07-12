@@ -6,6 +6,7 @@ import { join } from 'path';
 import { MoviesModule } from './movies/movies.module';
 import { CategoriesModule } from './categories/categories.module';
 import { LinksModule } from './links/links.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { LinksModule } from './links/links.module';
     MoviesModule,
     CategoriesModule,
     LinksModule,
+    UsersModule,
   ],
   controllers: [],
   providers: [],
