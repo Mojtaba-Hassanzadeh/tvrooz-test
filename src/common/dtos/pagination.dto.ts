@@ -5,6 +5,9 @@ import { CoreOutput } from './otuput.dto';
 export class PaginationInput {
   @Field(() => Int, { defaultValue: 1 })
   page: number;
+
+  @Field(() => Int, { defaultValue: 25 })
+  limit: number;
 }
 
 @ObjectType()

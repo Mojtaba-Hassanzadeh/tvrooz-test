@@ -18,6 +18,15 @@ import { UpdateMovieInput } from './dtos/update-movie.dto';
 import { Category } from 'src/categories/entities/category.entity';
 import { CategoryRepository } from 'src/categories/repositories/category.repository';
 import { DeleteMovieOutput } from './dtos/delete-movie.dto';
+import { MovieOutput } from './dtos/movie.dto';
+import {
+  SearchMovieNameInput,
+  SearchMovieSecondaryTitleInput,
+} from './dtos/search-movie-name.dto';
+import {
+  SearchMovieCategoryInput,
+  SearchMovieCategoryOutput,
+} from './dtos/search-movie-category.dto';
 
 @Resolver(() => Movie)
 export class MovieResolver {
@@ -26,6 +35,32 @@ export class MovieResolver {
     private readonly linkRepo: LinkRepository,
     private readonly categoryRepo: CategoryRepository,
   ) {}
+
+  @Query(() => MovieOutput)
+  async movieById(@Args('id') id: string): Promise<MovieOutput> {
+    return await this.movieService.getMovieById(id);
+  }
+
+  @Query(() => MoviesOutput)
+  async moviesByName(
+    @Args('input') input: SearchMovieNameInput,
+  ): Promise<MoviesOutput> {
+    return await this.movieService.getMovieByName(input);
+  }
+
+  @Query(() => MoviesOutput)
+  async moviesBySecondaryTitle(
+    @Args('input') input: SearchMovieSecondaryTitleInput,
+  ): Promise<MoviesOutput> {
+    return await this.movieService.getMovieByScondaryTitle(input);
+  }
+
+  @Query(() => SearchMovieCategoryOutput)
+  async moviesByCategory(
+    @Args('input') input: SearchMovieCategoryInput,
+  ): Promise<SearchMovieCategoryOutput> {
+    return await this.movieService.getMovieByCategory(input);
+  }
 
   @Query(() => MoviesOutput)
   movies(@Args('input') moviesInput: MoviesInput): Promise<MoviesOutput> {
