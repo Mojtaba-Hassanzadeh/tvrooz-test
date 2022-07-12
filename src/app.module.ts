@@ -7,6 +7,8 @@ import { MoviesModule } from './movies/movies.module';
 import { CategoriesModule } from './categories/categories.module';
 import { LinksModule } from './links/links.module';
 import { UsersModule } from './users/users.module';
+import { JwtModule } from './jwt/jwt.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { UsersModule } from './users/users.module';
     CategoriesModule,
     LinksModule,
     UsersModule,
+    JwtModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
