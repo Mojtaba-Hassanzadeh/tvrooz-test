@@ -105,26 +105,46 @@ export class MovieService {
     title,
   }: SearchMovieSecondaryTitleInput): Promise<MoviesOutput> {
     try {
-      const movies: Movie[] = (await this.moviesModel.find(
-        {
-          secondaryTitle: {
-            $regex: title,
-            $options: 'i',
-          },
-        },
-        null,
-        {
-          limit: limit,
-          skip: (page - 1) * limit,
-        },
-      )) as Movie[];
-      const totalResults = await this.moviesModel.countDocuments();
+      const movies = (await this.moviesModel.aggregate([
+        { "$match": { secondaryTitle: title } },
+        { $skip: (page - 1) * limit},
+        { $limit: limit },
+        {"$facet": {
+          "totalCount": [
+              { "$count": "count" }
+          ]}
+      }
+        
+      ])) as Movie[];
+        // {
+        //   "$facet": {
+        //     "totalData": [
+        //         { "$skip": (page - 1) * limit },
+        //         { "$limit": limit }
+        //     ],
+        //     "totalCount": [
+        //         { "$count": "count" }
+        //     ]
+        // }
+    // }
+        // { $match: { $text: { $search: title } } },
+        // { $sort: { score: { $meta: "textScore" } } },
+        // { $project: { name: 1, secondaryTitle: 1, _id: 0 } }
+        // {
+        //   $skip: (page - 1) * limit,
+        // },
+        // {
+        //   $limit: limit,
+        // },
+      // ])) //as Movie[];
+      console.log(movies[0]);
+      // const totalResults = movies.length
       if (movies) {
         return {
           ok: true,
           movies,
-          totalPages: Math.ceil(totalResults / limit),
-          totalResults,
+          // totalPages: Math.ceil(totalResults / limit),
+          // totalResults,
         };
       }
       return { ok: false, error: 'Movies not found' };
