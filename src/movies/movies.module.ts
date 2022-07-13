@@ -22,6 +22,7 @@ import { MovieRepository } from './repositories/movie.repository';
     CategoriesModule,
     LinksModule,
   ],
+  exports: [MovieService, MovieRepository, MongooseModule],
   providers: [MovieResolver, MovieService, MovieRepository],
 })
 export class MoviesModule {}

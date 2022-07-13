@@ -14,7 +14,7 @@ import { Movie, MovieDocument } from '../entities/movie.entity';
 export class MovieRepository {
   constructor(
     @InjectModel(Movie.name)
-    private readonly moviesRepo: Model<MovieDocument>,
+    private readonly moviesModel: Model<MovieDocument>,
     @InjectModel(Link.name)
     private readonly linksModel: Model<LinkDocument>,
     @InjectModel(Category.name)
@@ -24,9 +24,7 @@ export class MovieRepository {
   async createMovie(input: CreateMovieInput): Promise<Movie> {
     let movie: Movie = new Movie();
     try {
-      movie.name = input.name;
-      movie.secondaryTitle = input.secondaryTitle;
-      const newMovie = await this.moviesRepo.create(movie);
+      const newMovie = new this.moviesModel(input);
       if (input.link) {
         const link = await this.linksModel.findByIdAndUpdate(
           input.link,
@@ -62,7 +60,7 @@ export class MovieRepository {
   // TODO: check again
   async updateMovie(input: UpdateMovieInput): Promise<Movie> {
     try {
-      const movie = await this.moviesRepo.findByIdAndUpdate(
+      const movie = await this.moviesModel.findByIdAndUpdate(
         input.id,
         {
           name: input.name,
@@ -123,7 +121,7 @@ export class MovieRepository {
 
   async deleteMovie(id: string): Promise<Movie> {
     try {
-      const movie = await this.moviesRepo.findById(id);
+      const movie = await this.moviesModel.findById(id);
       if (movie.link) {
         await this.linksModel.findByIdAndUpdate(
           movie.link,
@@ -140,7 +138,7 @@ export class MovieRepository {
           );
         });
       }
-      await this.moviesRepo.deleteOne(movie._id);
+      await this.moviesModel.deleteOne(movie._id);
       return movie;
     } catch (error) {
       return null;

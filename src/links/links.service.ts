@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { MovieService } from 'src/movies/movies.service';
 import { CreateLinkInput, CreateLinkOutput } from './dtos/create-link.dto';
 import { DeleteLinkOutput } from './dtos/delete-link.dto';
 import { UpdateLinkInput } from './dtos/edit-link.dto';
@@ -15,7 +16,8 @@ export class LinkService {
     @InjectModel(Link.name)
     private readonly linksModel: Model<LinkDocument>,
     private readonly linkRepository: LinkRepository,
-  ) {}
+  ) // private readonly movieService: MovieService,
+  {}
 
   async allLinks(): Promise<LinksOutput> {
     try {
@@ -55,12 +57,22 @@ export class LinkService {
 
   async createLink(input: CreateLinkInput): Promise<CreateLinkOutput> {
     try {
-      const isExists = await this.linkRepository.checkExists(input.url);
-      if (isExists) {
+      const newLink = new this.linksModel(input);
+      const isUrlExists = await this.linkRepository.checkUrlExists(input.url);
+      if (isUrlExists) {
         return { ok: false, error: 'This link already exists' };
       }
-      const link = await this.linkRepository.createLink(input);
-      return { ok: true, link };
+      // if (input.movie) {
+      //   const movie = await this.movieService.getMovieById(
+      //     input.movie.toString(),
+      //   );
+      //   if (!movie) {
+      //     return { ok: false, error: 'This movie is not correct' };
+      //   }
+      // }
+      newLink.save();
+      // const link = await this.linkRepository.createLink(input);
+      return { ok: true, link: newLink };
     } catch (e) {
       return { ok: false, error: "Can't create link" };
     }

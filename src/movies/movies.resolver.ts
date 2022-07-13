@@ -24,7 +24,7 @@ import {
   SearchMovieSecondaryTitleInput,
 } from './dtos/search-movie-name.dto';
 import {
-  SearchMovieCategoryInput,
+  SearchMovieCategoryNameInput,
   SearchMovieCategoryOutput,
 } from './dtos/search-movie-category.dto';
 
@@ -57,9 +57,9 @@ export class MovieResolver {
 
   @Query(() => SearchMovieCategoryOutput)
   async moviesByCategory(
-    @Args('input') input: SearchMovieCategoryInput,
+    @Args('input') input: SearchMovieCategoryNameInput,
   ): Promise<SearchMovieCategoryOutput> {
-    return await this.movieService.getMovieByCategory(input);
+    return await this.movieService.getMovieByCategoryName(input);
   }
 
   @Query(() => MoviesOutput)

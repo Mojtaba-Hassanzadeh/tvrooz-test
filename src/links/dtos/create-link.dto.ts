@@ -3,7 +3,7 @@ import { CoreOutput } from 'src/common/dtos/otuput.dto';
 import { Link } from '../entities/link.entity';
 
 @InputType()
-export class CreateLinkInput extends PickType(Link, ['url']) {}
+export class CreateLinkInput extends PickType(Link, ['url', 'movie']) {}
 
 @ObjectType()
 export class CreateLinkOutput extends CoreOutput {

@@ -6,9 +6,15 @@ import {
 import { Movie } from '../entities/movie.entity';
 
 @InputType()
-export class SearchMovieCategoryInput extends PaginationInput {
+export class SearchMovieCategoryNameInput extends PaginationInput {
   @Field(() => String, { nullable: true })
-  category?: string;
+  categoryName?: string;
+}
+
+@InputType()
+export class SearchMovieCategorySlugInput extends PaginationInput {
+  @Field(() => String, { nullable: true })
+  categorySlug?: string;
 }
 
 @ObjectType()

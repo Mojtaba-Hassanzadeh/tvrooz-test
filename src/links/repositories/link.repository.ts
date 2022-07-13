@@ -12,10 +12,8 @@ export class LinkRepository {
     private readonly linksModel: Model<LinkDocument>,
   ) {}
 
-  async checkExists(url: string): Promise<boolean> {
-    let link = null;
-    link = await this.linksModel.findOne({ url: url }).exec();
-    return link === null ? false : true;
+  async checkUrlExists(url: string): Promise<Link> {
+    return await this.linksModel.findOne({ url: url }).exec();
   }
 
   async createLink(input: CreateLinkInput): Promise<Link> {

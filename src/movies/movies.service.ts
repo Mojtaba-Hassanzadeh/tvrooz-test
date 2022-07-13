@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { count } from 'console';
 import { Model } from 'mongoose';
+import { Category } from 'src/categories/entities/category.entity';
 import { CreateMovieInput, CreateMovieOutput } from './dtos/create-movie.dto';
 import { DeleteMovieOutput } from './dtos/delete-movie.dto';
 import { MovieOutput } from './dtos/movie.dto';
 import { MoviesInput, MoviesOutput } from './dtos/movies.dto';
 import {
-  SearchMovieCategoryInput,
+  SearchMovieCategoryNameInput,
   SearchMovieCategoryOutput,
 } from './dtos/search-movie-category.dto';
 import {
@@ -134,33 +136,34 @@ export class MovieService {
     }
   }
 
-  async getMovieByCategory({
+  async getMovieByCategoryName({
     page,
     limit,
-    category,
-  }: SearchMovieCategoryInput): Promise<SearchMovieCategoryOutput> {
+    categoryName,
+  }: SearchMovieCategoryNameInput): Promise<SearchMovieCategoryOutput> {
     try {
-      const allMovies = await this.moviesModel
-        .find({ 'categories.0': { $exists: true } }, null, {
-          // return movies with at least one category
-          limit: limit,
-          skip: (page - 1) * limit,
-        })
-        .populate('categories', 'name')
-        .exec(function (err, movies) {
-          if (err) return err;
-          movies.forEach(function (movie) {
-            console.log(movies.length);
-            console.log(movie.categories);
-          });
-        });
-      const totalResults = await this.moviesModel.countDocuments();
-      if (true) {
+      const movies: Movie[] = (await this.moviesModel.aggregate([
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'categories',
+            foreignField: '_id',
+            as: 'categories',
+          },
+        },
+        { $match: { 'categories.name': categoryName } },
+        { $skip: (page - 1) * limit },
+        { $limit: limit },
+      ])) as Movie[];
+
+      console.log(movies); //[0].categories);
+      // const totalResults = movies.length;
+      if (movies) {
         return {
           ok: true,
-          // movies,
-          totalPages: Math.ceil(totalResults / limit),
-          totalResults,
+          movies,
+          // totalPages: Math.ceil(totalResults / limit),
+          // totalResults,
         };
       }
       return { ok: false, error: 'Movies not found' };
@@ -174,6 +177,14 @@ export class MovieService {
 
   async createMovie(input: CreateMovieInput): Promise<CreateMovieOutput> {
     try {
+      // const link = await this.linksModel.findByIdAndUpdate(
+      //   input.link,
+      //   { movie: newMovie._id },
+      //   { new: true },
+      // );
+      // check link
+      // check category
+      // check movie
       const movie = await this.moviesRepo.createMovie(input);
       return { ok: true, movie };
     } catch (e) {
