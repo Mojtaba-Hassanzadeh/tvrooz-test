@@ -1,6 +1,7 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { PaginationInput } from 'src/common/dtos/pagination.dto';
 import { CategoryService } from './categories.service';
-import { CategoriesOutput } from './dtos/all-categories.dto';
+import { CategoriesOutput } from './dtos/categories.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
   CreateCategoryInput,
@@ -15,27 +16,22 @@ export class CategoryResolver {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Query(() => CategoriesOutput)
-  allCategories(): Promise<CategoriesOutput> {
-    return this.categoryService.allCategories();
+  getAllCategories(
+    @Args('input') input: PaginationInput,
+  ): Promise<CategoriesOutput> {
+    return this.categoryService.getAllCategories(input);
   }
 
   @Query(() => CategoryOutput)
   findCategoryById(@Args('id') id: string): Promise<CategoryOutput> {
-    return this.categoryService.findCategoryById(id);
+    return this.categoryService.getCategoryById(id);
   }
 
   @Mutation(() => CreateCategoryOutput)
-  async createAccount(
+  async createCategory(
     @Args('input') input: CreateCategoryInput,
   ): Promise<CreateCategoryOutput> {
-    try {
-      return this.categoryService.createCategory(input);
-    } catch (error) {
-      return {
-        ok: false,
-        error,
-      };
-    }
+    return this.categoryService.createCategory(input);
   }
 
   @Query(() => CategoriesOutput)

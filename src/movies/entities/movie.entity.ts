@@ -43,3 +43,5 @@ export class Movie extends CoreEntity {
 export const MoviewSchema = SchemaFactory.createForClass(Movie).index({
   secondaryTitle: 'text',
 });
+
+MoviewSchema.index({ secondaryTitle: 1 });

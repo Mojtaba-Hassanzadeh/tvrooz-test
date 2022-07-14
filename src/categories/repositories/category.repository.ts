@@ -5,23 +5,25 @@ import { InjectModel } from '@nestjs/mongoose';
 import { CreateCategoryInput } from '../dtos/create-category.dto';
 import { ObjectId } from 'mongodb';
 import { Movie } from 'src/movies/entities/movie.entity';
+import { PaginationInput } from 'src/common/dtos/pagination.dto';
+import { CategoriesOutput } from '../dtos/categories.dto';
 
 @Injectable()
 export class CategoryRepository {
   constructor(
     @InjectModel(Category.name)
-    private readonly categoriesModel: Model<CategoryDocument>,
+    private readonly categoryModel: Model<CategoryDocument>,
   ) {}
 
   async getOrCreate(name: string): Promise<Category> {
     const categoryName = name.trim().toLowerCase();
     const categorySlug = categoryName.replace(/ /g, '-');
-    let category = await this.categoriesModel
+    let category = await this.categoryModel
       .findOne({ slug: categorySlug })
       .exec();
 
     if (!category) {
-      category = new this.categoriesModel({
+      category = new this.categoryModel({
         name: categoryName,
         slug: categorySlug,
       });
@@ -36,20 +38,19 @@ export class CategoryRepository {
     return categoryName.replace(/ /g, '-');
   }
 
-  async checkExists(categoryName: string): Promise<boolean> {
+  async checkExists(categoryName: string): Promise<Category> {
     const categorySlug = this.getSlug(categoryName);
-    let category = null;
-    category = await this.categoriesModel
-      .findOne({ slug: categorySlug })
-      .exec();
-    return category === null ? false : true;
+    const [category] = await this.categoryModel.aggregate([
+      { $match: { slug: categorySlug } },
+    ]);
+    return category;
   }
 
-  async createCategory(input: CreateCategoryInput): Promise<Category> {
-    const categorySlug = this.getSlug(input.name);
-    const category = new this.categoriesModel({
-      name: input.name,
-      slug: categorySlug,
+  async createCategory({ name }: CreateCategoryInput): Promise<Category> {
+    const slug = this.getSlug(name);
+    const category = new this.categoryModel({
+      name,
+      slug,
     });
     await category.save();
     return category;
@@ -69,7 +70,7 @@ export class CategoryRepository {
     try {
       if (movie.categories.length > 0) {
         movie.categories.forEach(async (category) => {
-          const cat = await this.categoriesModel.findById(category);
+          const cat = await this.categoryModel.findById(category);
           if (cat) {
             console.log(cat);
             return cat;

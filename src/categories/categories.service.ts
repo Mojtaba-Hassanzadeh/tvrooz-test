@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CategoriesOutput } from './dtos/all-categories.dto';
+import { PaginationInput } from 'src/common/dtos/pagination.dto';
+import { CategoriesOutput } from './dtos/categories.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
   CreateCategoryInput,
@@ -19,16 +20,33 @@ import { CategoryRepository } from './repositories/category.repository';
 export class CategoryService {
   constructor(
     @InjectModel(Category.name)
-    private readonly categoriesModel: Model<CategoryDocument>,
-    private readonly categoryRepository: CategoryRepository,
+    private readonly categoryModel: Model<CategoryDocument>,
+    private readonly categoryRepo: CategoryRepository,
   ) {}
 
-  async allCategories(): Promise<CategoriesOutput> {
+  async getAllCategories({
+    page,
+    limit,
+  }: PaginationInput): Promise<CategoriesOutput> {
     try {
-      const categories = await this.categoriesModel.find();
+      const categories = await this.categoryModel.aggregate([
+        { $sort: { _id: 1 } },
+        { $setWindowFields: { output: { totalCount: { $count: {} } } } },
+        { $skip: (page - 1) * limit },
+        { $limit: limit },
+      ]);
+      if (categories) {
+        const totalResults = categories[0].totalCount;
+        return {
+          ok: true,
+          categories: categories as Category[],
+          totalPages: Math.ceil(totalResults / limit),
+          totalResults,
+        };
+      }
       return {
-        ok: true,
-        categories,
+        ok: false,
+        error: 'Not found any categories',
       };
     } catch (error) {
       return {
@@ -38,13 +56,15 @@ export class CategoryService {
     }
   }
 
-  async findCategoryById(id: string): Promise<CategoryOutput> {
+  async getCategoryById(_id: string): Promise<CategoryOutput> {
     try {
-      const category: Category = await this.categoriesModel.findById(id);
+      const category = await this.categoryModel.aggregate([
+        { $match: { _id } },
+      ]);
       if (category) {
         return {
           ok: true,
-          category,
+          // category as Category,
         };
       }
       return {
@@ -61,7 +81,7 @@ export class CategoryService {
 
   async findCategoryByName(input: CategoryInput): Promise<CategoriesOutput> {
     try {
-      const categories = await this.categoriesModel.find({
+      const categories = await this.categoryModel.find({
         name: {
           $regex: input.name,
           $options: 'i',
@@ -91,12 +111,12 @@ export class CategoryService {
     input: CreateCategoryInput,
   ): Promise<CreateCategoryOutput> {
     try {
-      const isExists = await this.categoryRepository.checkExists(input.name);
-      if (isExists) {
+      const category = await this.categoryRepo.checkExists(input.name);
+      if (category) {
         return { ok: false, error: 'This category already exists' };
       }
-      const category = await this.categoryRepository.createCategory(input);
-      return { ok: true, category };
+      const newCategory = await this.categoryRepo.createCategory(input);
+      return { ok: true, category: newCategory };
     } catch (e) {
       return { ok: false, error: "Can't create category" };
     }
@@ -107,11 +127,11 @@ export class CategoryService {
     name,
   }: EditCategoryInput): Promise<CategoryOutput> {
     try {
-      const category = await this.categoriesModel.findByIdAndUpdate(
+      const category = await this.categoryModel.findByIdAndUpdate(
         id,
         {
           name,
-          slug: this.categoryRepository.getSlug(name),
+          slug: this.categoryRepo.getSlug(name),
         },
         { new: true },
       );
@@ -129,7 +149,7 @@ export class CategoryService {
 
   async deleteCategoryById(id: string): Promise<DeleteCategoryOutput> {
     try {
-      const category = await this.categoriesModel.findByIdAndDelete(id);
+      const category = await this.categoryModel.findByIdAndDelete(id);
       if (category) {
         return {
           ok: true,

@@ -103,37 +103,55 @@ export class MovieService {
     page,
     limit,
     title,
+    linkId,
   }: SearchMovieSecondaryTitleInput): Promise<MoviesOutput> {
+    const sort: any = title
+      ? { score: { $meta: 'textScore' }, _id: 1 }
+      : { _id: 1 };
+    const $or = [
+      { $text: { $search: title } },
+      { secondaryTitle: { $regex: title } },
+    ];
+
     try {
-      const movies = await this.moviesModel.aggregate([
-        { $match: { $text: { $search: title } } },
-        { $sort: { score: { $meta: 'textScore' }, _id: 1 } },
-        { $setWindowFields: { output: { totalCount: { $count: {} } } } },
-        { $skip: (page - 1) * limit },
-        { $limit: limit },
+      const [moviesData] = await this.moviesModel.aggregate([
+        {
+          $match: {
+            ...(title ? { $or } : {}),
+            ...(linkId && { linkId: { $gte: 1 } }),
+          },
+        },
+        // { $sort: { score: { $meta: 'textScore' }, _id: 1 } },
+        // { $setWindowFields: { output: { totalCount: { $count: {} } } } },
+        // { $skip: (page - 1) * limit },
+        // { $limit: limit },
         // {
-        //   $facet: {
-        //     movies: [
-        //       { $sort: { score: { $meta: 'textScore' } } },
-        //       { $limit: limit },
-        //       { $skip: (page - 1) * limit },
-        //       { $project: { name: 1, secondaryTitle: 1, _id: 0 } },
-        //     ],
-        //     totalResults: [{ $count: 'count' }],
-        //   },
-        // },
+        {
+          $facet: {
+            movies: [
+              { $sort: sort },
+              { $skip: (page - 1) * limit },
+              { $limit: limit },
+              { $project: { name: 1, secondaryTitle: 1, _id: 0 } },
+            ],
+            totalResults: [{ $count: 'count' }],
+          },
+        },
       ]);
-      const totalResults = movies[0].totalCount;
+      const { movies = [], totalResults } = moviesData;
+      const totalResult = totalResults?.[0].count;
+
       if (movies) {
         return {
           ok: true,
-          movies,
-          totalPages: Math.ceil(totalResults / limit),
-          totalResults,
+          movies: movies,
+          totalPages: Math.ceil(totalResult / limit),
+          totalResults: totalResult,
         };
       }
       return { ok: false, error: 'Movies not found' };
     } catch (error) {
+      console.log(error);
       return {
         ok: false,
         error: 'Could not load movies',
