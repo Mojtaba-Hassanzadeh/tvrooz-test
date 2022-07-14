@@ -107,27 +107,29 @@ export class MovieService {
     try {
       const movies = await this.moviesModel.aggregate([
         { $match: { $text: { $search: title } } },
-        {
-          $facet: {
-            movies: [
-              { $project: { name: 1, secondaryTitle: 1, _id: 0 } },
-              { $sort: { score: { $meta: 'textScore' } } },
-              { $limit: limit },
-              { $skip: (page - 1) * limit },
-            ],
-            totalResults: [{ $count: 'count' }],
-          },
-        },
+        { $sort: { score: { $meta: 'textScore' }, _id: 1 } },
+        { $setWindowFields: { output: { totalCount: { $count: {} } } } },
+        { $skip: (page - 1) * limit },
+        { $limit: limit },
+        // {
+        //   $facet: {
+        //     movies: [
+        //       { $sort: { score: { $meta: 'textScore' } } },
+        //       { $limit: limit },
+        //       { $skip: (page - 1) * limit },
+        //       { $project: { name: 1, secondaryTitle: 1, _id: 0 } },
+        //     ],
+        //     totalResults: [{ $count: 'count' }],
+        //   },
+        // },
       ]);
-      console.log(movies[0].movies);
-      console.log(movies[0].totalResults[0].count);
-      // const totalResults = movies.length
+      const totalResults = movies[0].totalCount;
       if (movies) {
         return {
           ok: true,
-          movies: movies[0].movies,
-          // totalPages: Math.ceil(movies[0].totalResults / limit),
-          // totalResults: movies[0].totalResults,
+          movies,
+          totalPages: Math.ceil(totalResults / limit),
+          totalResults,
         };
       }
       return { ok: false, error: 'Movies not found' };
