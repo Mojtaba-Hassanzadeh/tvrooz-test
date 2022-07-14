@@ -18,7 +18,7 @@ export class Movie extends CoreEntity {
   name: string;
 
   @Field(() => String)
-  @Prop( { unique: true })
+  @Prop()
   @IsString()
   secondaryTitle: string;
 
@@ -40,4 +40,6 @@ export class Movie extends CoreEntity {
   })
   link: mongoose.Types.ObjectId;
 }
-export const MoviewSchema = SchemaFactory.createForClass(Movie).index({secondaryTitle: 'text'});
+export const MoviewSchema = SchemaFactory.createForClass(Movie).index({
+  secondaryTitle: 'text',
+});

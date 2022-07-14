@@ -105,46 +105,29 @@ export class MovieService {
     title,
   }: SearchMovieSecondaryTitleInput): Promise<MoviesOutput> {
     try {
-      const movies = (await this.moviesModel.aggregate([
-        { "$match": { secondaryTitle: title } },
-        { $skip: (page - 1) * limit},
-        { $limit: limit },
-        {"$facet": {
-          "totalCount": [
-              { "$count": "count" }
-          ]}
-      }
-        
-      ])) as Movie[];
-        // {
-        //   "$facet": {
-        //     "totalData": [
-        //         { "$skip": (page - 1) * limit },
-        //         { "$limit": limit }
-        //     ],
-        //     "totalCount": [
-        //         { "$count": "count" }
-        //     ]
-        // }
-    // }
-        // { $match: { $text: { $search: title } } },
-        // { $sort: { score: { $meta: "textScore" } } },
-        // { $project: { name: 1, secondaryTitle: 1, _id: 0 } }
-        // {
-        //   $skip: (page - 1) * limit,
-        // },
-        // {
-        //   $limit: limit,
-        // },
-      // ])) //as Movie[];
-      console.log(movies[0]);
+      const movies = await this.moviesModel.aggregate([
+        { $match: { $text: { $search: title } } },
+        {
+          $facet: {
+            movies: [
+              { $project: { name: 1, secondaryTitle: 1, _id: 0 } },
+              { $sort: { score: { $meta: 'textScore' } } },
+              { $limit: limit },
+              { $skip: (page - 1) * limit },
+            ],
+            totalResults: [{ $count: 'count' }],
+          },
+        },
+      ]);
+      console.log(movies[0].movies);
+      console.log(movies[0].totalResults[0].count);
       // const totalResults = movies.length
       if (movies) {
         return {
           ok: true,
-          movies,
-          // totalPages: Math.ceil(totalResults / limit),
-          // totalResults,
+          movies: movies[0].movies,
+          // totalPages: Math.ceil(movies[0].totalResults / limit),
+          // totalResults: movies[0].totalResults,
         };
       }
       return { ok: false, error: 'Movies not found' };
