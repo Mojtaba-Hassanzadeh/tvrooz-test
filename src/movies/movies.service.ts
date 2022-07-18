@@ -103,7 +103,7 @@ export class MovieService {
     page,
     limit,
     title,
-    linkId,
+    // linkId,
   }: SearchMovieSecondaryTitleInput): Promise<MoviesOutput> {
     const sort: any = title
       ? { score: { $meta: 'textScore' }, _id: 1 }
@@ -118,7 +118,7 @@ export class MovieService {
         {
           $match: {
             ...(title ? { $or } : {}),
-            ...(linkId && { linkId: { $gte: 1 } }),
+            // ...(linkId && { linkId: { $gte: 1 } }),
           },
         },
         // { $sort: { score: { $meta: 'textScore' }, _id: 1 } },

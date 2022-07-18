@@ -29,24 +29,25 @@ export class CategoryService {
     limit,
   }: PaginationInput): Promise<CategoriesOutput> {
     try {
-      const categories = await this.categoryModel.aggregate([
-        { $sort: { _id: 1 } },
-        { $setWindowFields: { output: { totalCount: { $count: {} } } } },
-        { $skip: (page - 1) * limit },
-        { $limit: limit },
+      const [categoriesData] = await this.categoryModel.aggregate([
+        {
+          $facet: {
+            categories: [
+              { $sort: { _id: 1 } },
+              { $skip: (page - 1) * limit },
+              { $limit: limit },
+            ],
+            total: [{ $count: 'count' }],
+          },
+        },
       ]);
-      if (categories) {
-        const totalResults = categories[0].totalCount;
-        return {
-          ok: true,
-          categories: categories as Category[],
-          totalPages: Math.ceil(totalResults / limit),
-          totalResults,
-        };
-      }
+      const { categories = [], total } = categoriesData;
+      const totalResults = total?.[0].count;
       return {
-        ok: false,
-        error: 'Not found any categories',
+        ok: true,
+        categories,
+        totalPages: Math.ceil(totalResults / limit),
+        totalResults
       };
     } catch (error) {
       return {
