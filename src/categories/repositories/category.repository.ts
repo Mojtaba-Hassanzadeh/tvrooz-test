@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Category, CategoryDocument } from '../entities/category.entity';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateCategoryInput } from '../dtos/create-category.dto';
+import { CreateCategoryInput, CreateCategoryOutput } from '../dtos/create-category.dto';
 import { ObjectId } from 'mongodb';
 import { Movie } from 'src/movies/entities/movie.entity';
 import { PaginationInput } from 'src/common/dtos/pagination.dto';
@@ -85,4 +85,12 @@ export class CategoryRepository {
       return null;
     }
   }
+
+  // async create({name}: CreateCategoryInput): Promise<Category> {
+  //   const category = new this.categoryModel({
+  //     name,
+  //   });
+  //   await category.save();
+  //   return category;
+  // }
 }
