@@ -86,11 +86,11 @@ export class CategoryRepository {
     }
   }
 
-  // async create({name}: CreateCategoryInput): Promise<Category> {
-  //   const category = new this.categoryModel({
-  //     name,
-  //   });
-  //   await category.save();
-  //   return category;
-  // }
+  async create({name}: CreateCategoryInput): Promise<Category> {
+    const category = new this.categoryModel({
+      name,
+    });
+    await category.save();
+    return category;
+  }
 }
