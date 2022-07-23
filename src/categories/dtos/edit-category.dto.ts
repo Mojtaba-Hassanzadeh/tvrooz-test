@@ -1,13 +1,20 @@
-import { Field, InputType, ObjectType, PartialType } from '@nestjs/graphql';
-import { ObjectId } from 'mongoose';
+import { Field, InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
+import { Prop } from '@nestjs/mongoose';
+import { IsString } from 'class-validator'
 import { CoreOutput } from 'src/common/dtos/otuput.dto';
-import { CreateCategoryInput } from './create-category.dto';
+import { Category } from '../entities/category.entity';
 
-@InputType()
-export class EditCategoryInput extends PartialType(CreateCategoryInput) {
+@InputType('UpdateCategoryInput')
+export class UpdateCategoryInput extends PartialType(OmitType(Category, [
+  '_id',
+  'createdAt',
+  'updatedAt'
+])) {
   @Field(() => String)
+  @Prop({ unique: true, required: true, type: String })
+  @IsString()
   id: string;
 }
 
-@ObjectType()
-export class EditCategoryOutput extends CoreOutput {}
+@ObjectType('UpdateCategoryOutput')
+export class UpdateCategoryOutput extends CoreOutput {}

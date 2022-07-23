@@ -10,8 +10,8 @@ import {
 } from './dtos/create-category.dto';
 import { DeleteCategoryOutput } from './dtos/delete-category.dto';
 import {
-  EditCategoryInput,
-  EditCategoryOutput,
+  UpdateCategoryInput,
+  UpdateCategoryOutput,
 } from './dtos/edit-category.dto';
 import { Category, CategoryDocument } from './entities/category.entity';
 import { CategoryRepository } from './repositories/category.repository';
@@ -126,7 +126,7 @@ export class CategoryService {
   async updateCategoryById({
     id,
     name,
-  }: EditCategoryInput): Promise<CategoryOutput> {
+  }: UpdateCategoryInput): Promise<CategoryOutput> {
     try {
       const category = await this.categoryModel.findByIdAndUpdate(
         id,

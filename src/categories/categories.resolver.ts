@@ -8,7 +8,7 @@ import {
   CreateCategoryOutput,
 } from './dtos/create-category.dto';
 import { DeleteCategoryOutput } from './dtos/delete-category.dto';
-import { EditCategoryInput } from './dtos/edit-category.dto';
+import { UpdateCategoryInput } from './dtos/edit-category.dto';
 import { Category } from './entities/category.entity';
 
 @Resolver(() => Category)
@@ -43,7 +43,7 @@ export class CategoryResolver {
 
   @Mutation(() => CategoryOutput)
   updateCategoryById(
-    @Args('input') input: EditCategoryInput,
+    @Args('input') input: UpdateCategoryInput,
   ): Promise<CategoryOutput> {
     return this.categoryService.updateCategoryById(input);
   }
