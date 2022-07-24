@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PaginationInput } from 'src/common/dtos/pagination.dto';
@@ -105,15 +105,43 @@ export class CategoryService {
     }
   }
 
+  async nameIsRepeated(name: string): Promise<boolean> {
+    try {
+      const category = await this.categoryModel.findOne({ name });
+      return category ? true : false;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async slugIsRepeated(slug: string): Promise<boolean> {
+    try {
+      const category = await this.categoryModel.findOne({ slug });
+      return category ? true : false;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
   async createCategory(
     input: CreateCategoryInput,
   ): Promise<CreateCategoryOutput> {
     try {
-      const category = await this.categoryRepo.checkExists(input.name);
-      if (category) {
-        return { ok: false, error: 'This category already exists' };
+      const repeatedName = await this.nameIsRepeated(input.name);
+      if (repeatedName) {
+        return {
+          ok: false,
+          error: 'Category name already exists',
+        };
       }
-      const newCategory = await this.categoryRepo.createCategory(input);
+      const repeatedSlug = await this.slugIsRepeated(input.slug);
+      if (repeatedSlug) {
+        return {
+          ok: false,
+          error: 'Category slug already exists',
+        };
+      }
+      const newCategory = await this.categoryRepo.create(input);
       return { ok: true, category: newCategory };
     } catch (e) {
       return { ok: false, error: "Can't create category" };

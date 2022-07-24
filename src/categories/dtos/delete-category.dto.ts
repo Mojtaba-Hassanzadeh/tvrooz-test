@@ -7,7 +7,7 @@ import { CoreOutput } from 'src/common/dtos/otuput.dto';
 export class DeleteCategoryInput {
   @Field(() => String)
   @IsString()
-  id: string;
+  categoryId: string;
 }
 
 @ObjectType('DeleteCategoryOutput')

@@ -11,6 +11,7 @@ import { Movie } from 'src/movies/entities/movie.entity';
 import { PaginationInput } from 'src/common/dtos/pagination.dto';
 import { CategoriesOutput } from '../dtos/categories.dto';
 import { UpdateCategoryInput } from '../dtos/update-category.dto';
+import { DeleteCategoryInput } from '../dtos/delete-category.dto';
 
 @Injectable()
 export class CategoryRepository {
@@ -107,6 +108,16 @@ export class CategoryRepository {
       restOfArgs,
       { new: true },
     );
+    if (category) {
+      return category;
+    }
+    return null;
+  }
+
+  async delete({ categoryId }: DeleteCategoryInput): Promise<Category | null> {
+    const category = await this.categoryModel.findByIdAndDelete({
+      _id: categoryId,
+    });
     if (category) {
       return category;
     }
