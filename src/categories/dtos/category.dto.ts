@@ -1,4 +1,5 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import { IsOptional } from 'class-validator';
 import { CoreOutput } from 'src/common/dtos/otuput.dto';
 import { PaginationInput } from 'src/common/dtos/pagination.dto';
 import { Category } from '../entities/category.entity';
@@ -12,5 +13,6 @@ export class CategoryInput extends PaginationInput {
 @ObjectType()
 export class CategoryOutput extends CoreOutput {
   @Field(() => Category, { nullable: true })
+  @IsOptional()
   category?: Category;
 }

@@ -8,7 +8,7 @@ import {
   CreateCategoryOutput,
 } from './dtos/create-category.dto';
 import { DeleteCategoryOutput } from './dtos/delete-category.dto';
-import { UpdateCategoryInput } from './dtos/edit-category.dto';
+import { UpdateCategoryInput } from './dtos/update-category.dto';
 import { Category } from './entities/category.entity';
 
 @Resolver(() => Category)

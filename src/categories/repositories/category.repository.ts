@@ -2,11 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { Category, CategoryDocument } from '../entities/category.entity';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateCategoryInput, CreateCategoryOutput } from '../dtos/create-category.dto';
+import {
+  CreateCategoryInput,
+  CreateCategoryOutput,
+} from '../dtos/create-category.dto';
 import { ObjectId } from 'mongodb';
 import { Movie } from 'src/movies/entities/movie.entity';
 import { PaginationInput } from 'src/common/dtos/pagination.dto';
 import { CategoriesOutput } from '../dtos/categories.dto';
+import { UpdateCategoryInput } from '../dtos/update-category.dto';
 
 @Injectable()
 export class CategoryRepository {
@@ -86,11 +90,26 @@ export class CategoryRepository {
     }
   }
 
-  async create({name}: CreateCategoryInput): Promise<Category> {
+  async create({ name }: CreateCategoryInput): Promise<Category> {
     const category = new this.categoryModel({
       name,
     });
     await category.save();
     return category;
+  }
+
+  async update({
+    categoryId,
+    ...restOfArgs
+  }: UpdateCategoryInput): Promise<Category | null> {
+    const category = await this.categoryModel.findByIdAndUpdate(
+      { _id: categoryId },
+      restOfArgs,
+      { new: true },
+    );
+    if (category) {
+      return category;
+    }
+    return null;
   }
 }

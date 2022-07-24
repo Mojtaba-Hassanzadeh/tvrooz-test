@@ -9,10 +9,7 @@ import {
   CreateCategoryOutput,
 } from './dtos/create-category.dto';
 import { DeleteCategoryOutput } from './dtos/delete-category.dto';
-import {
-  UpdateCategoryInput,
-  UpdateCategoryOutput,
-} from './dtos/edit-category.dto';
+import { UpdateCategoryInput } from './dtos/update-category.dto';
 import { Category, CategoryDocument } from './entities/category.entity';
 import { CategoryRepository } from './repositories/category.repository';
 
@@ -47,7 +44,7 @@ export class CategoryService {
         ok: true,
         categories,
         totalPages: Math.ceil(totalResults / limit),
-        totalResults
+        totalResults,
       };
     } catch (error) {
       return {
@@ -124,12 +121,12 @@ export class CategoryService {
   }
 
   async updateCategoryById({
-    id,
+    categoryId,
     name,
   }: UpdateCategoryInput): Promise<CategoryOutput> {
     try {
       const category = await this.categoryModel.findByIdAndUpdate(
-        id,
+        categoryId,
         {
           name,
           slug: this.categoryRepo.getSlug(name),
