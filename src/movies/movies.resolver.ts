@@ -73,10 +73,10 @@ export class MovieResolver {
   }
 
   //TODO: null
-  @ResolveField(() => Category, { nullable: true })
-  async category(@Parent() movie: Movie): Promise<Category> {
-    return await this.categoryRepo.getCategoriesByMovieId(movie);
-  }
+  // @ResolveField(() => Category, { nullable: true })
+  // async category(@Parent() movie: Movie): Promise<Category> {
+  //   return await this.categoryRepo.getCategoriesByMovieId(movie);
+  // }
 
   @Mutation(() => CreateMovieOutput)
   createMovie(

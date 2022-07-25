@@ -7,8 +7,14 @@ import {
   CreateCategoryInput,
   CreateCategoryOutput,
 } from './dtos/create-category.dto';
-import { DeleteCategoryOutput } from './dtos/delete-category.dto';
-import { UpdateCategoryInput } from './dtos/update-category.dto';
+import {
+  DeleteCategoryInput,
+  DeleteCategoryOutput,
+} from './dtos/delete-category.dto';
+import {
+  UpdateCategoryInput,
+  UpdateCategoryOutput,
+} from './dtos/update-category.dto';
 import { Category } from './entities/category.entity';
 
 @Resolver(() => Category)
@@ -24,14 +30,7 @@ export class CategoryResolver {
 
   @Query(() => CategoryOutput)
   findCategoryById(@Args('id') id: string): Promise<CategoryOutput> {
-    return this.categoryService.getCategoryById(id);
-  }
-
-  @Mutation(() => CreateCategoryOutput)
-  async createCategory(
-    @Args('input') input: CreateCategoryInput,
-  ): Promise<CreateCategoryOutput> {
-    return this.categoryService.createCategory(input);
+    return this.categoryService.findCategoryById(id);
   }
 
   @Query(() => CategoriesOutput)
@@ -41,15 +40,31 @@ export class CategoryResolver {
     return this.categoryService.findCategoryByName(input);
   }
 
-  @Mutation(() => CategoryOutput)
-  updateCategoryById(
+  @Query(() => CategoriesOutput)
+  findCategoryBySlug(
+    @Args('input') input: CategoryInput,
+  ): Promise<CategoriesOutput> {
+    return this.categoryService.findCategoryBySlug(input);
+  }
+
+  @Mutation(() => CreateCategoryOutput)
+  async createCategory(
+    @Args('input') input: CreateCategoryInput,
+  ): Promise<CreateCategoryOutput> {
+    return this.categoryService.createCategory(input);
+  }
+
+  @Mutation(() => UpdateCategoryOutput)
+  updateCategory(
     @Args('input') input: UpdateCategoryInput,
-  ): Promise<CategoryOutput> {
-    return this.categoryService.updateCategoryById(input);
+  ): Promise<UpdateCategoryOutput> {
+    return this.categoryService.updateCategory(input);
   }
 
   @Mutation(() => DeleteCategoryOutput)
-  deleteCategoryById(@Args('id') id: string): Promise<DeleteCategoryOutput> {
-    return this.categoryService.deleteCategoryById(id);
+  deleteCategory(
+    @Args('input') input: DeleteCategoryInput,
+  ): Promise<DeleteCategoryOutput> {
+    return this.categoryService.deleteCategory(input);
   }
 }

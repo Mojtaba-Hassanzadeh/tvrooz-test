@@ -5,7 +5,7 @@ import {
   OmitType,
   PartialType,
 } from '@nestjs/graphql';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { CoreOutput } from 'src/common/dtos/otuput.dto';
 import { Category } from '../entities/category.entity';
 
@@ -19,4 +19,8 @@ export class UpdateCategoryInput extends PartialType(
 }
 
 @ObjectType('UpdateCategoryOutput')
-export class UpdateCategoryOutput extends CoreOutput {}
+export class UpdateCategoryOutput extends CoreOutput {
+  @Field(() => Category, { nullable: true })
+  @IsOptional()
+  category?: Category;
+}
