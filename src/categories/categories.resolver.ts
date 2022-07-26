@@ -22,26 +22,26 @@ export class CategoryResolver {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Query(() => CategoriesOutput)
-  getAllCategories(
+  async getAllCategories(
     @Args('input') input: PaginationInput,
   ): Promise<CategoriesOutput> {
     return this.categoryService.getAllCategories(input);
   }
 
   @Query(() => CategoryOutput)
-  findCategoryById(@Args('id') id: string): Promise<CategoryOutput> {
+  async findCategoryById(@Args('id') id: string): Promise<CategoryOutput> {
     return this.categoryService.findCategoryById(id);
   }
 
   @Query(() => CategoriesOutput)
-  findCategoryByName(
+  async findCategoryByName(
     @Args('input') input: CategoryInput,
   ): Promise<CategoriesOutput> {
     return this.categoryService.findCategoryByName(input);
   }
 
   @Query(() => CategoriesOutput)
-  findCategoryBySlug(
+  async findCategoryBySlug(
     @Args('input') input: CategoryInput,
   ): Promise<CategoriesOutput> {
     return this.categoryService.findCategoryBySlug(input);
@@ -55,14 +55,14 @@ export class CategoryResolver {
   }
 
   @Mutation(() => UpdateCategoryOutput)
-  updateCategory(
+  async updateCategory(
     @Args('input') input: UpdateCategoryInput,
   ): Promise<UpdateCategoryOutput> {
     return this.categoryService.updateCategory(input);
   }
 
   @Mutation(() => DeleteCategoryOutput)
-  deleteCategory(
+  async deleteCategory(
     @Args('input') input: DeleteCategoryInput,
   ): Promise<DeleteCategoryOutput> {
     return this.categoryService.deleteCategory(input);

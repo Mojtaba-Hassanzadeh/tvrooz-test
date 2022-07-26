@@ -87,33 +87,19 @@ export class CategoryService {
     name,
   }: CategoryInput): Promise<CategoriesOutput> {
     try {
-      if (name) {
-        console.log('***********');
-        console.log(name);
-        console.log('***********');
+      if (name && name.length > 0) {
         const [categoriesData] = await this.categoryModel.aggregate([
           {
             $match: {
-              slug: {
-                $regex: name,
-              },
-              // $or: [
-              // {
-              //   $text: { $search: name },
-              // },
-              // {
-              // name: {
-              //   $regex: name,
-              // },
-              // },
-              // ],
+              $or: [{ $text: { $search: name } }, { name: { $regex: name } }],
             },
+          },
+          {
             $facet: {
               categories: [
-                // { $sort: { score: { $meta: 'textScore' }, _id: 1 } },
+                { $sort: { score: { $meta: 'textScore' }, _id: 1 } },
                 { $skip: (page - 1) * limit },
                 { $limit: limit },
-                { $project: { name: 1, slug: 1, _id: 0 } },
               ],
               total: [{ $count: 'count' }],
             },
