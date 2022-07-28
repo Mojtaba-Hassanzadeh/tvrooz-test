@@ -2,11 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { Category, CategoryDocument } from '../entities/category.entity';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateCategoryInput, CreateCategoryOutput } from '../dtos/create-category.dto';
-import { ObjectId } from 'mongodb';
-import { Movie } from 'src/movies/entities/movie.entity';
-import { PaginationInput } from 'src/common/dtos/pagination.dto';
-import { CategoriesOutput } from '../dtos/categories.dto';
+import { CreateCategoryInput } from '../dtos/create-category.dto';
+import { UpdateCategoryInput } from '../dtos/update-category.dto';
+import { DeleteCategoryInput } from '../dtos/delete-category.dto';
 
 @Injectable()
 export class CategoryRepository {
@@ -15,59 +13,34 @@ export class CategoryRepository {
     private readonly categoryModel: Model<CategoryDocument>,
   ) {}
 
-  async checkExists(categoryName: string): Promise<Category> {
-    const categorySlug = this.getSlug(categoryName);
-    const [category] = await this.categoryModel.aggregate([
-      { $match: { slug: categorySlug } },
-    ]);
-    return category;
-  }
-
-  async createCategory({ name }: CreateCategoryInput): Promise<Category> {
-    const slug = this.getSlug(name);
-    const category = new this.categoryModel({
-      name,
-      slug,
-    });
+  async create(input: CreateCategoryInput): Promise<Category> {
+    const category = new this.categoryModel(input);
     await category.save();
     return category;
   }
 
-  // async getCategoriesByMovieId(id: ObjectId): Promise<Category> {
-  //   try {
-  //     console.log(id);
-  //     console.log(await this.categoriesModel.find({ movie: [id] }).exec());
-  //     return await this.categoriesModel.findOne({ movie: id });
-  //   } catch (error) {
-  //     return null;
-  //   }
-  // }
-
-  async getCategoriesByMovieId(movie: Movie): Promise<Category> {
-    try {
-      if (movie.categories.length > 0) {
-        movie.categories.forEach(async (category) => {
-          const cat = await this.categoryModel.findById(category);
-          if (cat) {
-            console.log(cat);
-            return cat;
-          } else {
-            return null;
-          }
-        });
-      } else {
-        return null;
-      }
-    } catch (error) {
-      return null;
+  async update({
+    categoryId,
+    ...restOfArgs
+  }: UpdateCategoryInput): Promise<Category | null> {
+    const category = await this.categoryModel.findByIdAndUpdate(
+      { _id: categoryId },
+      restOfArgs,
+      { new: true },
+    );
+    if (category) {
+      return category;
     }
+    return null;
   }
 
-  async create({name}: CreateCategoryInput): Promise<Category> {
-    const category = new this.categoryModel({
-      name,
+  async delete({ categoryId }: DeleteCategoryInput): Promise<Category | null> {
+    const category = await this.categoryModel.findByIdAndDelete({
+      _id: categoryId,
     });
-    await category.save();
-    return category;
+    if (category) {
+      return category;
+    }
+    return null;
   }
 }

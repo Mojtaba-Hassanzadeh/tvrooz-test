@@ -7,8 +7,14 @@ import {
   CreateCategoryInput,
   CreateCategoryOutput,
 } from './dtos/create-category.dto';
-import { DeleteCategoryOutput } from './dtos/delete-category.dto';
-import { UpdateCategoryInput } from './dtos/edit-category.dto';
+import {
+  DeleteCategoryInput,
+  DeleteCategoryOutput,
+} from './dtos/delete-category.dto';
+import {
+  UpdateCategoryInput,
+  UpdateCategoryOutput,
+} from './dtos/update-category.dto';
 import { Category } from './entities/category.entity';
 
 @Resolver(() => Category)
@@ -16,15 +22,29 @@ export class CategoryResolver {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Query(() => CategoriesOutput)
-  getAllCategories(
+  async getAllCategories(
     @Args('input') input: PaginationInput,
   ): Promise<CategoriesOutput> {
     return this.categoryService.getAllCategories(input);
   }
 
   @Query(() => CategoryOutput)
-  findCategoryById(@Args('id') id: string): Promise<CategoryOutput> {
-    return this.categoryService.getCategoryById(id);
+  async findCategoryById(@Args('id') id: string): Promise<CategoryOutput> {
+    return this.categoryService.findCategoryById(id);
+  }
+
+  @Query(() => CategoriesOutput)
+  async findCategoryByName(
+    @Args('input') input: CategoryInput,
+  ): Promise<CategoriesOutput> {
+    return this.categoryService.findCategoryByName(input);
+  }
+
+  @Query(() => CategoriesOutput)
+  async findCategoryBySlug(
+    @Args('input') input: CategoryInput,
+  ): Promise<CategoriesOutput> {
+    return this.categoryService.findCategoryBySlug(input);
   }
 
   @Mutation(() => CreateCategoryOutput)
@@ -34,22 +54,17 @@ export class CategoryResolver {
     return this.categoryService.createCategory(input);
   }
 
-  @Query(() => CategoriesOutput)
-  findCategoryByName(
-    @Args('input') input: CategoryInput,
-  ): Promise<CategoriesOutput> {
-    return this.categoryService.findCategoryByName(input);
-  }
-
-  @Mutation(() => CategoryOutput)
-  updateCategoryById(
+  @Mutation(() => UpdateCategoryOutput)
+  async updateCategory(
     @Args('input') input: UpdateCategoryInput,
-  ): Promise<CategoryOutput> {
-    return this.categoryService.updateCategoryById(input);
+  ): Promise<UpdateCategoryOutput> {
+    return this.categoryService.updateCategory(input);
   }
 
   @Mutation(() => DeleteCategoryOutput)
-  deleteCategoryById(@Args('id') id: string): Promise<DeleteCategoryOutput> {
-    return this.categoryService.deleteCategoryById(id);
+  async deleteCategory(
+    @Args('input') input: DeleteCategoryInput,
+  ): Promise<DeleteCategoryOutput> {
+    return this.categoryService.deleteCategory(input);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PaginationInput } from 'src/common/dtos/pagination.dto';
@@ -8,11 +8,14 @@ import {
   CreateCategoryInput,
   CreateCategoryOutput,
 } from './dtos/create-category.dto';
-import { DeleteCategoryOutput } from './dtos/delete-category.dto';
+import {
+  DeleteCategoryInput,
+  DeleteCategoryOutput,
+} from './dtos/delete-category.dto';
 import {
   UpdateCategoryInput,
   UpdateCategoryOutput,
-} from './dtos/edit-category.dto';
+} from './dtos/update-category.dto';
 import { Category, CategoryDocument } from './entities/category.entity';
 import { CategoryRepository } from './repositories/category.repository';
 
@@ -47,7 +50,7 @@ export class CategoryService {
         ok: true,
         categories,
         totalPages: Math.ceil(totalResults / limit),
-        totalResults
+        totalResults,
       };
     } catch (error) {
       return {
@@ -57,15 +60,13 @@ export class CategoryService {
     }
   }
 
-  async getCategoryById(_id: string): Promise<CategoryOutput> {
+  async findCategoryById(_id: string): Promise<CategoryOutput> {
     try {
-      const category = await this.categoryModel.aggregate([
-        { $match: { _id } },
-      ]);
+      const category = await this.categoryModel.findById(_id);
       if (category) {
         return {
           ok: true,
-          // category as Category,
+          category,
         };
       }
       return {
@@ -80,15 +81,63 @@ export class CategoryService {
     }
   }
 
-  async findCategoryByName(input: CategoryInput): Promise<CategoriesOutput> {
+  async findCategoryByName({
+    page,
+    limit,
+    name,
+  }: CategoryInput): Promise<CategoriesOutput> {
+    try {
+      if (name && name.length > 0) {
+        const [categoriesData] = await this.categoryModel.aggregate([
+          {
+            $match: {
+              $or: [{ $text: { $search: name } }, { name: { $regex: name } }],
+            },
+          },
+          {
+            $facet: {
+              categories: [
+                { $sort: { score: { $meta: 'textScore' }, _id: 1 } },
+                { $skip: (page - 1) * limit },
+                { $limit: limit },
+              ],
+              total: [{ $count: 'count' }],
+            },
+          },
+        ]);
+        const { categories = [], total } = categoriesData;
+        const totalResults = total?.[0].count;
+        if (categories) {
+          return {
+            ok: true,
+            categories,
+            totalPages: Math.ceil(totalResults / limit),
+            totalResults,
+          };
+        }
+        return {
+          ok: false,
+          error: 'Category not found',
+        };
+      }
+    } catch (error) {
+      console.log(error);
+      return {
+        ok: false,
+        error: 'Could not load categories',
+      };
+    }
+  }
+
+  async findCategoryBySlug(input: CategoryInput): Promise<CategoriesOutput> {
     try {
       const categories = await this.categoryModel.find({
-        name: {
-          $regex: input.name,
+        slug: {
+          $regex: input.slug,
           $options: 'i',
         },
-        limit: 25,
-        skip: (input.page - 1) * 25,
+        limit: input.limit,
+        skip: (input.page - 1) * input.limit,
       });
       if (categories) {
         return {
@@ -108,37 +157,82 @@ export class CategoryService {
     }
   }
 
+  async nameIsRepeated(name: string): Promise<boolean> {
+    try {
+      const category = await this.categoryModel.findOne({ name });
+      return category ? true : false;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async slugIsRepeated(slug: string): Promise<boolean> {
+    try {
+      const category = await this.categoryModel.findOne({ slug });
+      return category ? true : false;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
   async createCategory(
     input: CreateCategoryInput,
   ): Promise<CreateCategoryOutput> {
     try {
-      const category = await this.categoryRepo.checkExists(input.name);
-      if (category) {
-        return { ok: false, error: 'This category already exists' };
+      const repeatedName = await this.nameIsRepeated(input.name);
+      if (repeatedName) {
+        return {
+          ok: false,
+          error: 'Category name already exists',
+        };
       }
-      const newCategory = await this.categoryRepo.createCategory(input);
+      const repeatedSlug = await this.slugIsRepeated(input.slug);
+      if (repeatedSlug) {
+        return {
+          ok: false,
+          error: 'Category slug already exists',
+        };
+      }
+      const newCategory = await this.categoryRepo.create(input);
       return { ok: true, category: newCategory };
-    } catch (e) {
+    } catch (error) {
       return { ok: false, error: "Can't create category" };
     }
   }
 
-  async updateCategoryById({
-    id,
-    name,
-  }: UpdateCategoryInput): Promise<CategoryOutput> {
+  async updateCategory(
+    input: UpdateCategoryInput,
+  ): Promise<UpdateCategoryOutput> {
+    const { categoryId, name, slug } = input;
     try {
+      const repeatedName = await this.nameIsRepeated(name);
+      if (repeatedName) {
+        return {
+          ok: false,
+          error: 'Category name already exists',
+        };
+      }
+      const repeatedSlug = await this.slugIsRepeated(slug);
+      if (repeatedSlug) {
+        return {
+          ok: false,
+          error: 'Category slug already exists',
+        };
+      }
       const category = await this.categoryModel.findByIdAndUpdate(
-        id,
-        {
-          name,
-          slug: this.categoryRepo.getSlug(name),
-        },
+        categoryId,
+        input,
         { new: true },
       );
+      if (category) {
+        return {
+          ok: true,
+          category,
+        };
+      }
       return {
-        ok: true,
-        category,
+        ok: false,
+        error: 'Category not found',
       };
     } catch (error) {
       return {
@@ -148,9 +242,11 @@ export class CategoryService {
     }
   }
 
-  async deleteCategoryById(id: string): Promise<DeleteCategoryOutput> {
+  async deleteCategory({
+    categoryId,
+  }: DeleteCategoryInput): Promise<DeleteCategoryOutput> {
     try {
-      const category = await this.categoryModel.findByIdAndDelete(id);
+      const category = await this.categoryModel.findByIdAndDelete(categoryId);
       if (category) {
         return {
           ok: true,

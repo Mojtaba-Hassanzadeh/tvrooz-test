@@ -11,14 +11,19 @@ export type CategoryDocument = Category & Document;
 @Schema({ timestamps: true })
 export class Category extends CoreEntity {
   @Field(() => String)
-  @Prop({ unique: true, required: true })
+  @Prop({ unique: true })
   @IsString()
   name: string;
 
   @Field(() => String)
-  @Prop({ unique: true, required: true })
+  @Prop({ unique: true })
   @IsString()
   slug: string;
 }
 
-export const CategorySchema = SchemaFactory.createForClass(Category);
+export const CategorySchema = SchemaFactory.createForClass(Category).index({
+  name: 'text',
+  slug: 'text',
+});
+
+CategorySchema.index({ name: 1, slug: 1 });
