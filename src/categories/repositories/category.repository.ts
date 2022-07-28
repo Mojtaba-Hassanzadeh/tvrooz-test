@@ -15,29 +15,6 @@ export class CategoryRepository {
     private readonly categoryModel: Model<CategoryDocument>,
   ) {}
 
-  async getOrCreate(name: string): Promise<Category> {
-    const categoryName = name.trim().toLowerCase();
-    const categorySlug = categoryName.replace(/ /g, '-');
-    let category = await this.categoryModel
-      .findOne({ slug: categorySlug })
-      .exec();
-
-    if (!category) {
-      category = new this.categoryModel({
-        name: categoryName,
-        slug: categorySlug,
-      });
-      await category.save();
-    }
-
-    return category;
-  }
-
-  getSlug(name: string): string {
-    const categoryName = name.trim().toLowerCase();
-    return categoryName.replace(/ /g, '-');
-  }
-
   async checkExists(categoryName: string): Promise<Category> {
     const categorySlug = this.getSlug(categoryName);
     const [category] = await this.categoryModel.aggregate([
